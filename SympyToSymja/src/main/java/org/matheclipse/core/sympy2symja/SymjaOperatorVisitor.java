@@ -29,7 +29,7 @@ public class SymjaOperatorVisitor extends SymjaGenericUnsupportedASTVisitor<Stri
 
 	@Override
 	public String visitAdd(Add add, SymjaIndentation param) {
-      return "Plus";
+      return "F.Plus";
 	}
 	
 	@Override
@@ -54,12 +54,12 @@ public class SymjaOperatorVisitor extends SymjaGenericUnsupportedASTVisitor<Stri
 	
 	@Override
 	public String visitDiv(Div div, SymjaIndentation param) {
-      return "Divide";
+      return "F.Divide";
 	}
 	
 	@Override
 	public String visitFloorDiv(FloorDiv floorDiv, SymjaIndentation param) {
-      return "Floor"; // maybe "//" could be wrong string
+      return "F.Quotient"; // maybe "//" could be wrong string
 	}
 	
 	@Override
@@ -69,12 +69,12 @@ public class SymjaOperatorVisitor extends SymjaGenericUnsupportedASTVisitor<Stri
 	
 	@Override
 	public String visitModulo(io.github.danielnaczo.python3parser.model.expr.operators.binaryops.Mod modulo, SymjaIndentation param) {
-      return "Mod";
+      return "F.Mod";
 	}
 	
 	@Override
 	public String visitMult(Mult mult, SymjaIndentation param) {
-      return "Times";
+      return "F.Times";
 	}
 	
 	@Override
@@ -89,7 +89,7 @@ public class SymjaOperatorVisitor extends SymjaGenericUnsupportedASTVisitor<Stri
 	
 	@Override
 	public String visitSub(Sub sub, SymjaIndentation param) {
-      return "Subtract";
+      return "F.Subtract";
 	}
 	
 	@Override
@@ -124,17 +124,17 @@ public class SymjaOperatorVisitor extends SymjaGenericUnsupportedASTVisitor<Stri
 	
 	@Override
 	public String visitLt(Lt lt, SymjaIndentation param) {
-      return "Less";
+      return "F.Less";
 	}
 	
 	@Override
 	public String visitLtE(LtE lte, SymjaIndentation param) {
-      return "LessEqual";
+      return "F.LessEqual";
 	}
 	
 	@Override
 	public String visitNotEq(NotEq notEq, SymjaIndentation param) {
-      return "Unequal";
+      return "F.Unequal";
 	}
 	
 	@Override
@@ -144,11 +144,11 @@ public class SymjaOperatorVisitor extends SymjaGenericUnsupportedASTVisitor<Stri
 	
 	@Override
 	public String visitOr(Or notIn, SymjaIndentation param) {
-      return "Or";
+      return "F.Or";
 	}
 	
 	@Override
 	public String visitAnd(And notIn, SymjaIndentation param) {
-      return "And";
+      return "F.And";
 	}
 }

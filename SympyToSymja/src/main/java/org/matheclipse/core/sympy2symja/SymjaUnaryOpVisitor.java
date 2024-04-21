@@ -21,17 +21,17 @@ public class SymjaUnaryOpVisitor extends SymjaGenericUnsupportedASTVisitor<Strin
 	
 	@Override
 	public String visitNot(Not not, SymjaIndentation param) {
-      return "Not ";
+      return "F.Not";
 	}
 	
 	@Override
 	public String visitUAdd(UAdd uAdd, SymjaIndentation param) {
-      return "Plus";
+      return "F.Plus";
 	}
 	
 	@Override
 	public String visitUSub(USub uSub, SymjaIndentation param) {
-      return "Minus";
+      return "F.Negate";
 	}
 	
 	@Override

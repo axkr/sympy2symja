@@ -77,9 +77,23 @@ public class SymjaExpressionVisitor
   public static final Map<String, String> CONSTANT_SYMBOLS_MAP =
       ParserConfig.TRIE_STRING2STRING_BUILDER.withMatch(TrieMatch.EXACT).build();
 
+  public static final Map<String, String> S_CONSTANT_SYMBOLS_MAP =
+      ParserConfig.TRIE_STRING2STRING_BUILDER.withMatch(TrieMatch.EXACT).build();
   static {
+    CONSTANT_SYMBOLS_MAP.put("oo", "CInfinity");
     CONSTANT_SYMBOLS_MAP.put("pi", "Pi");
+
+    S_CONSTANT_SYMBOLS_MAP.put("Exp1", "E");
+    S_CONSTANT_SYMBOLS_MAP.put("Half", "C1D2");
+    S_CONSTANT_SYMBOLS_MAP.put("ImaginaryUnit", "I");
+    S_CONSTANT_SYMBOLS_MAP.put("Infinity", "CInfinity");
+    S_CONSTANT_SYMBOLS_MAP.put("NegativeOne", "CN1");
+    S_CONSTANT_SYMBOLS_MAP.put("NegativeInfinity", "CNInfinity");
+    S_CONSTANT_SYMBOLS_MAP.put("NaN", "Indeterminate");
+    S_CONSTANT_SYMBOLS_MAP.put("One", "C1");
+    S_CONSTANT_SYMBOLS_MAP.put("Zero", "C0");
   }
+
   @Override
   public String visitArguments(Arguments arguments, SymjaIndentation param) {
     String string = new String();
@@ -159,9 +173,61 @@ public class SymjaExpressionVisitor
     if (atomElement instanceof Name) {
       Identifier id = ((Name) atomElement).getId();
       String name = id.getName();
+      if (name.equals("Integer") && trailers.size() == 1) {
+        Expression expression = trailers.get(0);
+        if (expression instanceof Arguments) {
+          Arguments arguments = (Arguments) expression;
+          List<Expression> args = arguments.getArgs();
+          if (args.size() == 1) {
+            Expression arg1 = args.get(0);
+            // String numberString = ((Num) arg1).getN();
+              string = "F.IntegerPart(";
+              string = string.concat(arg1.accept(new SymjaExpressionVisitor(),
+                  new SymjaIndentation(param.getIndentationLevel())));
+              string = string + ")";
+              return string;
+
+          } 
+        }
+      } else if (name.equals("Float") && trailers.size() == 1) {
+        Expression expression = trailers.get(0);
+        if (expression instanceof Arguments) {
+          Arguments arguments = (Arguments) expression;
+          List<Expression> args = arguments.getArgs();
+          if (args.size() == 1) {
+            Expression arg1 = args.get(0);
+            if (arg1 instanceof Num) {
+              String numberString = ((Num) arg1).getN();
+              return "F.num(" + numberString + ")";
+            }
+          } else if (args.size() == 2) {
+            Expression arg1 = args.get(0);
+            Expression arg2 = args.get(1);
+            if (arg1 instanceof Num && arg2 instanceof Num) {
+              String numberString = ((Num) arg1).getN();
+              String precisionString = ((Num) arg2).getN();
+              return "F.num(new Apfloat(\"" + numberString + "\", " + precisionString + "))";
+            }
+          }
+        }
+      } else if (name.equals("S") && trailers.size() == 1) {
+        Expression expression = trailers.get(0);
+        if (expression instanceof Attribute) {
+          Identifier ident = ((Attribute) expression).getAttr();
+          String constantName = ident.getName();
+          String str = S_CONSTANT_SYMBOLS_MAP.get(constantName);
+          if (str != null) {
+            return "F." + str;
+          }
+          str = AST2Expr.PREDEFINED_SYMBOLS_MAP.get(constantName.toLowerCase());
+          if (str != null) {
+            return "S." + str;
+          }
+        }
+      }
       String str = AST2Expr.PREDEFINED_SYMBOLS_MAP.get(name.toLowerCase());
       if (str != null) {
-        string = str;
+        string = "F." + str;
       } else {
         string = name;
       }
@@ -195,8 +261,8 @@ public class SymjaExpressionVisitor
     Expression right = binOp.getRight();
 
 
-    String operatorName = binOp.accept(new SymjaOperatorVisitor(),
-        new SymjaIndentation(param.getIndentationLevel()));
+    String operatorName =
+        binOp.accept(new SymjaOperatorVisitor(), new SymjaIndentation(param.getIndentationLevel()));
     string = string.concat(operatorName);
     string = string.concat("(");
     string = string.concat(left.accept(new SymjaExpressionVisitor(),
@@ -463,7 +529,7 @@ public class SymjaExpressionVisitor
     String nameStr = name.getId().getName();
     String str = CONSTANT_SYMBOLS_MAP.get(nameStr.toLowerCase());
     if (str != null) {
-      return str;
+      return "F." + str;
     }
     return nameStr;
   }
@@ -475,7 +541,38 @@ public class SymjaExpressionVisitor
 
   @Override
   public String visitNum(Num num, SymjaIndentation param) {
-    return num.getN();
+    String numberString = num.getN();
+    if (numberString.contains(".")) {
+      return "F.num(" + numberString + ")";
+    }
+    if (numberString.length() == 1) {
+      char zz = numberString.charAt(0);
+      switch (zz) {
+        case '0':
+          return "F.C0";
+        case '1':
+          return "F.C1";
+        case '2':
+          return "F.C2";
+        case '3':
+          return "F.C3";
+        case '4':
+          return "F.C4";
+        case '5':
+          return "F.C5";
+        case '6':
+          return "F.C6";
+        case '7':
+          return "F.C7";
+        case '8':
+          return "F.C8";
+        case '9':
+          return "F.C9";
+        default:
+          break;
+      }
+    }
+    return "F.ZZ(" + numberString + ")";
   }
 
   @Override
@@ -543,8 +640,8 @@ public class SymjaExpressionVisitor
     SliceAbstract slice = subscript.getSlice();
 
     string = string.concat("[");
-    string = string.concat(slice.accept(new SymjaSliceVisitor(),
-        new SymjaIndentation(param.getIndentationLevel())));
+    string = string.concat(
+        slice.accept(new SymjaSliceVisitor(), new SymjaIndentation(param.getIndentationLevel())));
     string = string.concat("]");
     return string;
   }
@@ -560,13 +657,15 @@ public class SymjaExpressionVisitor
 
     List<Expression> elts = tuple.getElts();
 
-    string = string.concat("(");
+    string = string.concat("F.List(");
 
     if (elts != null) {
       for (int i = 0; i < elts.size(); i++) {
         string = string.concat(elts.get(i).accept(new SymjaExpressionVisitor(),
             new SymjaIndentation(param.getIndentationLevel())));
-        string = string.concat(", ");
+        if (i < elts.size() - 1) {
+          string = string.concat(", ");
+        }
       }
     }
     string = string.concat(")");
@@ -607,10 +706,22 @@ public class SymjaExpressionVisitor
     if (inBrackets) {
       string = string.concat("(");
     }
+    if (unaryOp instanceof USub) {
+      USub uSub = (USub) unaryOp;
+      Expression expr = uSub.getExpression();
+      if (expr instanceof Name) {
+        String name = ((Name) expr).getId().getName();
+        if (name.equals("oo")) {
+          return "F.CNInfinity";
+        }
+      }
+    }
     string = string.concat(unaryOp.accept(new SymjaUnaryOpVisitor(),
         new SymjaIndentation(param.getIndentationLevel())));
+    string = string.concat("(");
     string = string.concat(expression.accept(new SymjaExpressionVisitor(),
         new SymjaIndentation(param.getIndentationLevel())));
+    string = string.concat(")");
     if (inBrackets) {
       string = string.concat(")");
     }
