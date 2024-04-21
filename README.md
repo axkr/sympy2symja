@@ -1,1 +1,1 @@
-Very experimental prototype for converting SymPy math expressions (Python) into Symja math expressions (Java).
+Very experimental prototype for transpiling [SymPy math expressions (Python)](https://github.com/sympy/sympy) into [Symja math expressions (Java)](https://github.com/axkr/symja_android_library).
