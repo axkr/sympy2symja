@@ -79,7 +79,7 @@ public class SymjaOperatorVisitor extends SymjaGenericUnsupportedASTVisitor<Stri
 	
 	@Override
 	public String visitPow(Pow pow, SymjaIndentation param) {
-      return "Power";
+      return "F.Power";
 	}
 	
 	@Override
@@ -94,17 +94,17 @@ public class SymjaOperatorVisitor extends SymjaGenericUnsupportedASTVisitor<Stri
 	
 	@Override
 	public String visitEq(Eq eq, SymjaIndentation param) {
-      return "Equal";
+      return "F.Equal";
 	}
 	
 	@Override
 	public String visitGt(Gt gt, SymjaIndentation param) {
-      return "Greater";
+      return "F.Greater";
 	}
 	
 	@Override
 	public String visitGtE(GtE gte, SymjaIndentation param) {
-      return "GreaterEqual";
+      return "F.GreaterEqual";
 	}
 	
 	@Override

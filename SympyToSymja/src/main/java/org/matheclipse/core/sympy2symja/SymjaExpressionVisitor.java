@@ -79,6 +79,10 @@ public class SymjaExpressionVisitor
 
   public static final Map<String, String> S_CONSTANT_SYMBOLS_MAP =
       ParserConfig.TRIE_STRING2STRING_BUILDER.withMatch(TrieMatch.EXACT).build();
+
+  public static final Map<String, String> FUNCTIONS_SYMBOLS_MAP =
+      ParserConfig.TRIE_STRING2STRING_BUILDER.withMatch(TrieMatch.EXACT).build();
+
   static {
     CONSTANT_SYMBOLS_MAP.put("oo", "CInfinity");
     CONSTANT_SYMBOLS_MAP.put("pi", "Pi");
@@ -91,7 +95,24 @@ public class SymjaExpressionVisitor
     S_CONSTANT_SYMBOLS_MAP.put("NegativeInfinity", "CNInfinity");
     S_CONSTANT_SYMBOLS_MAP.put("NaN", "Indeterminate");
     S_CONSTANT_SYMBOLS_MAP.put("One", "C1");
+    S_CONSTANT_SYMBOLS_MAP.put("Pi", "Pi");
     S_CONSTANT_SYMBOLS_MAP.put("Zero", "C0");
+
+    FUNCTIONS_SYMBOLS_MAP.put("ITE", "If");
+    FUNCTIONS_SYMBOLS_MAP.put("Eq", "Equal");
+    FUNCTIONS_SYMBOLS_MAP.put("Equality", "Equal");
+    FUNCTIONS_SYMBOLS_MAP.put("Ne", "Unequal");
+    FUNCTIONS_SYMBOLS_MAP.put("Unequality", "Unequal");
+
+    FUNCTIONS_SYMBOLS_MAP.put("Lt", "Less");
+    FUNCTIONS_SYMBOLS_MAP.put("StrictLessThan", "Less");
+    FUNCTIONS_SYMBOLS_MAP.put("LessThan", "LessEqual");
+    FUNCTIONS_SYMBOLS_MAP.put("Le", "LessEqual");
+    FUNCTIONS_SYMBOLS_MAP.put("Gt", "Greater");
+    FUNCTIONS_SYMBOLS_MAP.put("StrictGreaterThan", "Greater");
+    FUNCTIONS_SYMBOLS_MAP.put("GreaterThan", "GreaterEqual");
+    FUNCTIONS_SYMBOLS_MAP.put("Ge", "GreaterEqual");
+
   }
 
   @Override
@@ -181,13 +202,13 @@ public class SymjaExpressionVisitor
           if (args.size() == 1) {
             Expression arg1 = args.get(0);
             // String numberString = ((Num) arg1).getN();
-              string = "F.IntegerPart(";
-              string = string.concat(arg1.accept(new SymjaExpressionVisitor(),
-                  new SymjaIndentation(param.getIndentationLevel())));
-              string = string + ")";
-              return string;
+            string = "F.IntegerPart(";
+            string = string.concat(arg1.accept(new SymjaExpressionVisitor(),
+                new SymjaIndentation(param.getIndentationLevel())));
+            string = string + ")";
+            return string;
 
-          } 
+          }
         }
       } else if (name.equals("Float") && trailers.size() == 1) {
         Expression expression = trailers.get(0);
@@ -225,11 +246,20 @@ public class SymjaExpressionVisitor
           }
         }
       }
-      String str = AST2Expr.PREDEFINED_SYMBOLS_MAP.get(name.toLowerCase());
-      if (str != null) {
-        string = "F." + str;
+      if (name.equals("Tuple")) {
+        string = "F.List";
       } else {
-        string = name;
+        String str = FUNCTIONS_SYMBOLS_MAP.get(name);
+        if (str != null) {
+          string = "F." + str;
+        } else {
+          str = AST2Expr.PREDEFINED_SYMBOLS_MAP.get(name.toLowerCase());
+          if (str != null) {
+            string = "F." + str;
+          } else {
+            string = name;
+          }
+        }
       }
     } else {
       string = string.concat(atomElement.accept(new SymjaExpressionVisitor(),
