@@ -1,7 +1,6 @@
 package org.matheclipse.core.sympy2symja;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -47,9 +46,6 @@ public class SympyToSymjaExpr {
     System.out.println(
         "Create a Symja Java string from the SymPy expression input");
     F.initSymbols();
-    String userHome = System.getProperty("user.home");
-    File sourceLocation =
-        new File(userHome + "/git/symja_android_library/symja_android_library/doc/functions");
     String inputExpression;
     String trimmedInput;
     while (true) {
